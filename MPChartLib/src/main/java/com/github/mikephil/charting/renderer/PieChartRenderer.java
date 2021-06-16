@@ -44,6 +44,7 @@ public class PieChartRenderer extends DataRenderer {
     protected Paint mHolePaint;
     protected Paint mTransparentCirclePaint;
     protected Paint mValueLinePaint;
+    protected Paint mValueDotPaint;
 
     /**
      * paint object for the text that can be displayed in the center of the
@@ -97,6 +98,10 @@ public class PieChartRenderer extends DataRenderer {
 
         mValueLinePaint = new Paint(Paint.ANTI_ALIAS_FLAG);
         mValueLinePaint.setStyle(Style.STROKE);
+
+
+        mValueDotPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
+        mValueDotPaint.setStyle(Style.FILL);
     }
 
     public Paint getPaintHole() {
@@ -538,11 +543,15 @@ public class PieChartRenderer extends DataRenderer {
                             transformedAngle * Utils.FDEG2RAD))
                             : labelRadius * valueLineLength2;
 
-                    final float pt0x = line1Radius * sliceXBase + center.x;
-                    final float pt0y = line1Radius * sliceYBase + center.y;
+                    final float pt0x = (line1Radius + 15) * sliceXBase + center.x;
+                    final float pt0y = (line1Radius + 15) * sliceYBase + center.y;
 
-                    final float pt1x = labelRadius * (1 + valueLineLength1) * sliceXBase + center.x;
-                    final float pt1y = labelRadius * (1 + valueLineLength1) * sliceYBase + center.y;
+                    float circleRadius = mValueLinePaint.getStrokeWidth() * 1.5f;
+                    mValueDotPaint.setColor(mValueLinePaint.getColor());
+                    c.drawCircle(pt0x, pt0y, circleRadius, mValueDotPaint);
+
+                    final float pt1x = (labelRadius + 15) * (1 + valueLineLength1) * sliceXBase + center.x;
+                    final float pt1y = (labelRadius + 15) * (1 + valueLineLength1) * sliceYBase + center.y;
 
                     if (transformedAngle % 360.0 >= 90.0 && transformedAngle % 360.0 <= 270.0) {
                         pt2x = pt1x - polyline2Width;
@@ -668,7 +677,12 @@ public class PieChartRenderer extends DataRenderer {
      * @param y
      */
     protected void drawEntryLabel(Canvas c, String label, float x, float y) {
-        c.drawText(label, x, y, mEntryLabelsPaint);
+        String[] textLines = label.split("\n");
+        float lineY = y;
+        for (String line : textLines) {
+            c.drawText(line, x, lineY, mEntryLabelsPaint);
+            lineY += 50f;
+        }
     }
 
     @Override
